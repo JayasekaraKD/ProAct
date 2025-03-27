@@ -1,0 +1,37 @@
+---
+// src/components/dashboard/CreateRelationshipButton.astro
+---
+
+<button
+    id="create-relationship-button"
+    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+>
+    <span class="material-icons text-sm">add</span>
+    Create New Relationship
+</button>
+
+<script>
+    import {
+        modalState,
+        selectedRelation,
+        isEditMode,
+    } from "../../store/relationshipStore";
+
+    const createButton = document.getElementById("create-relationship-button");
+
+    createButton?.addEventListener("click", () => {
+        // Reset states for create mode
+        selectedRelation.set(null);
+        isEditMode.set(true);
+
+        // Open modal in create mode
+        modalState.set({
+            isOpen: true,
+            isUpdating: false,
+            isDeleting: false,
+            isSubmitting: false,
+            error: null,
+            activeTab: "organization",
+        });
+    });
+</script>

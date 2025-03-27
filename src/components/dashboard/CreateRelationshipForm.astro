@@ -1,0 +1,372 @@
+---
+// src/components/dashboard/CreateRelationshipForm.astro
+---
+
+<form id="create-relationship-form" class="flex flex-col h-full max-h-[90vh]">
+    <!-- Error Message -->
+    <div
+        id="create-error"
+        class="hidden px-6 py-4 bg-red-50 border-b border-red-100"
+    >
+        <p class="text-red-600 font-medium">Error</p>
+        <p class="text-red-500 text-sm mt-1"></p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 px-4 border-b bg-white" role="tablist">
+        <button
+            type="button"
+            role="tab"
+            data-tab="basic"
+            class="px-4 py-2 text-sm text-blue-600 border-b-2 border-blue-600"
+        >
+            Basic Information
+        </button>
+        <button
+            type="button"
+            role="tab"
+            data-tab="address"
+            class="px-4 py-2 text-sm text-gray-600 border-b-2 border-transparent"
+        >
+            Address
+        </button>
+        <button
+            type="button"
+            role="tab"
+            data-tab="additional"
+            class="px-4 py-2 text-sm text-gray-600 border-b-2 border-transparent"
+        >
+            Additional Info
+        </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+        <!-- Basic Information -->
+        <div data-tab-content="basic" class="space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        Short Name *
+                        <span
+                            class="text-red-500 error-message"
+                            data-error="shortName"></span>
+                    </label>
+                    <input
+                        type="text"
+                        name="shortName"
+                        required
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        Full Name *
+                        <span
+                            class="text-red-500 error-message"
+                            data-error="name"></span>
+                    </label>
+                    <input
+                        type="text"
+                        name="name"
+                        required
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        Telephone
+                    </label>
+                    <input
+                        type="tel"
+                        name="telephone"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        Email
+                        <span
+                            class="text-red-500 error-message"
+                            data-error="email"></span>
+                    </label>
+                    <input
+                        type="email"
+                        name="email"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+                <div class="col-span-2">
+                    <div class="flex gap-4">
+                        <label class="inline-flex items-center">
+                            <input
+                                type="checkbox"
+                                name="isCustomer"
+                                class="mr-2"
+                            />
+                            Customer
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input
+                                type="checkbox"
+                                name="isSupplier"
+                                class="mr-2"
+                            />
+                            Supplier
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Address -->
+        <div data-tab-content="address" class="hidden space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Street</label
+                    >
+                    <input
+                        type="text"
+                        name="street"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >House Number</label
+                    >
+                    <input
+                        type="text"
+                        name="houseNumber"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Postcode</label
+                    >
+                    <input
+                        type="text"
+                        name="postcode"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Place</label
+                    >
+                    <input
+                        type="text"
+                        name="place"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Land</label
+                    >
+                    <input
+                        type="text"
+                        name="land"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div data-tab-content="additional" class="hidden space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Website</label
+                    >
+                    <input
+                        type="url"
+                        name="website"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        KVK Number
+                        <span
+                            class="text-red-500 error-message"
+                            data-error="kvkNumber"></span>
+                    </label>
+                    <input
+                        type="text"
+                        name="kvkNumber"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >VAT Number</label
+                    >
+                    <input
+                        type="text"
+                        name="vatNumber"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 px-6 py-4 border-t">
+        <button
+            type="button"
+            id="cancel-create"
+            class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+        >
+            Cancel
+        </button>
+        <button
+            type="submit"
+            id="submit-create"
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 flex items-center gap-2"
+        >
+            Create Relationship
+        </button>
+    </div>
+</form>
+
+<script>
+    import { relationships } from "../../store/relationshipStore";
+    import { relationshipValidation } from "../../utils/validation";
+
+    // Form elements
+    const createForm = document.getElementById(
+        "create-relationship-form",
+    ) as HTMLFormElement;
+    const submitButton = document.getElementById(
+        "submit-create",
+    ) as HTMLButtonElement;
+    const cancelButton = document.getElementById("cancel-create");
+    const errorDiv = document.getElementById("create-error");
+
+    // Tab elements
+    const tabButtons = document.querySelectorAll('[role="tab"]');
+    const tabContents = document.querySelectorAll("[data-tab-content]");
+
+    // Tab switching
+    function switchTab(tabId: string) {
+        tabButtons.forEach((button) => {
+            const isActive = button.getAttribute("data-tab") === tabId;
+            button.classList.toggle("text-blue-600", isActive);
+            button.classList.toggle("border-blue-600", isActive);
+            button.classList.toggle("text-gray-600", !isActive);
+            button.classList.toggle("border-transparent", !isActive);
+        });
+
+        tabContents.forEach((content) => {
+            const isActive = content.getAttribute("data-tab-content") === tabId;
+            content.classList.toggle("hidden", !isActive);
+        });
+    }
+
+    // Handle form submission
+    async function handleSubmit(e: Event) {
+        e.preventDefault();
+        if (!createForm || !submitButton) return;
+
+        // Collect form data
+        const formData = new FormData(createForm);
+        const data = {
+            shortName: formData.get("shortName") as string,
+            name: formData.get("name") as string,
+            telephone: (formData.get("telephone") as string) || null,
+            email: (formData.get("email") as string) || null,
+            website: (formData.get("website") as string) || null,
+            kvkNumber: (formData.get("kvkNumber") as string) || null,
+            vatNumber: (formData.get("vatNumber") as string) || null,
+            street: (formData.get("street") as string) || null,
+            houseNumber: (formData.get("houseNumber") as string) || null,
+            postcode: (formData.get("postcode") as string) || null,
+            place: (formData.get("place") as string) || null,
+            land: (formData.get("land") as string) || null,
+            isCustomer: formData.get("isCustomer") === "on",
+            isSupplier: formData.get("isSupplier") === "on",
+            languageCorrespondence: "en", // Default value
+            currency: "EUR", // Default value
+        };
+
+        // Validate
+        const { isValid, errors } = relationshipValidation.validateForm(data);
+
+        if (!isValid) {
+            // Show validation errors
+            document.querySelectorAll(".error-message").forEach((el) => {
+                const field = el.getAttribute("data-error");
+                if (field && errors[field]) {
+                    el.textContent = errors[field];
+                } else {
+                    el.textContent = "";
+                }
+            });
+            return;
+        }
+
+        try {
+            submitButton.disabled = true;
+            submitButton.innerHTML =
+                '<span class="material-icons animate-spin text-sm">refresh</span> Creating...';
+
+            if (errorDiv) errorDiv.classList.add("hidden");
+
+            const response = await fetch("/api/relationships", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    responseData.error ||
+                        (responseData.details &&
+                            JSON.stringify(responseData.details)) ||
+                        "Failed to create relationship",
+                );
+            }
+
+            // Update store and close dialog
+            const currentRelations = relationships.get();
+            relationships.set([responseData.data, ...currentRelations]);
+
+            // Reload page to ensure everything is in sync
+            window.location.reload();
+        } catch (error) {
+            console.error("Error creating relationship:", error);
+            if (errorDiv) {
+                const errorMessage = errorDiv.querySelector("p:last-child");
+                if (errorMessage) {
+                    errorMessage.textContent =
+                        error instanceof Error
+                            ? error.message
+                            : "An unknown error occurred";
+                }
+                errorDiv.classList.remove("hidden");
+            }
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = "Create Relationship";
+        }
+    }
+
+    // Event listeners
+    createForm?.addEventListener("submit", handleSubmit);
+
+    tabButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const tabId = button.getAttribute("data-tab");
+            if (tabId) switchTab(tabId);
+        });
+    });
+</script>

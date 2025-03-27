@@ -1,0 +1,293 @@
+---
+// src/components/relationship/tabs/OrganizationTabContent.astro
+import { Save } from "lucide-react";
+---
+
+<div id="organization-content" class="space-y-6">
+    <!-- Error Message -->
+    <div
+        id="error-message"
+        class="hidden bg-red-50 text-red-600 p-3 rounded-md"
+    >
+    </div>
+
+    <!-- Save Controls - Only shown in edit mode -->
+    <div id="edit-controls" class="hidden flex justify-end gap-2">
+        <button
+            id="save-button"
+            class="flex items-center gap-2 px-3 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50"
+        >
+            <span class="material-icons">save</span>
+            Save Changes
+        </button>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+        <div>
+            <label class="text-sm text-gray-600">Short name:</label>
+            <div class="mt-1" id="shortName-container">
+                <div class="font-medium view-mode" id="shortName-display"></div>
+                <input
+                    type="text"
+                    id="shortName-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                />
+            </div>
+        </div>
+        <div>
+            <label class="text-sm text-gray-600">Name:</label>
+            <div class="mt-1" id="name-container">
+                <div class="font-medium view-mode" id="name-display"></div>
+                <input
+                    type="text"
+                    id="name-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                />
+            </div>
+        </div>
+        <div>
+            <label class="text-sm text-gray-600">Email:</label>
+            <div class="mt-1" id="email-container">
+                <div class="font-medium view-mode" id="email-display"></div>
+                <input
+                    type="email"
+                    id="email-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                />
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+        <div>
+            <label class="text-sm text-gray-600">Telephone:</label>
+            <div class="mt-1" id="telephone-container">
+                <div class="font-medium view-mode" id="telephone-display"></div>
+                <input
+                    type="tel"
+                    id="telephone-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                />
+            </div>
+        </div>
+        <div>
+            <label class="text-sm text-gray-600">Website:</label>
+            <div class="mt-1" id="website-container">
+                <div class="font-medium view-mode" id="website-display"></div>
+                <input
+                    type="url"
+                    id="website-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                />
+            </div>
+        </div>
+        <div>
+            <label class="text-sm text-gray-600">KVK Number:</label>
+            <div class="mt-1" id="kvkNumber-container">
+                <div class="font-medium view-mode" id="kvkNumber-display"></div>
+                <input
+                    type="text"
+                    id="kvkNumber-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                />
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="text-sm text-gray-600">VAT Number:</label>
+            <div class="mt-1" id="vatNumber-container">
+                <div class="font-medium view-mode" id="vatNumber-display"></div>
+                <input
+                    type="text"
+                    id="vatNumber-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                />
+            </div>
+        </div>
+        <div>
+            <label class="text-sm text-gray-600">Type:</label>
+            <div class="mt-1 flex gap-4">
+                <label class="inline-flex items-center">
+                    <input
+                        type="checkbox"
+                        id="isCustomer-checkbox"
+                        class="mr-2"
+                    />
+                    Customer
+                </label>
+                <label class="inline-flex items-center">
+                    <input
+                        type="checkbox"
+                        id="isSupplier-checkbox"
+                        class="mr-2"
+                    />
+                    Supplier
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    import {
+        selectedRelation,
+        isEditMode,
+        handleUpdate,
+        modalState,
+    } from "../../../store/relationshipStore";
+
+    let currentRelation: any = null;
+
+    // Helper function to get all form values
+    function getFormData() {
+        return {
+            shortName: (
+                document.getElementById("shortName-input") as HTMLInputElement
+            ).value,
+            name: (document.getElementById("name-input") as HTMLInputElement)
+                .value,
+            email: (document.getElementById("email-input") as HTMLInputElement)
+                .value,
+            telephone: (
+                document.getElementById("telephone-input") as HTMLInputElement
+            ).value,
+            website: (
+                document.getElementById("website-input") as HTMLInputElement
+            ).value,
+            kvkNumber: (
+                document.getElementById("kvkNumber-input") as HTMLInputElement
+            ).value,
+            vatNumber: (
+                document.getElementById("vatNumber-input") as HTMLInputElement
+            ).value,
+            isCustomer: (
+                document.getElementById(
+                    "isCustomer-checkbox",
+                ) as HTMLInputElement
+            ).checked,
+            isSupplier: (
+                document.getElementById(
+                    "isSupplier-checkbox",
+                ) as HTMLInputElement
+            ).checked,
+        };
+    }
+
+    // Toggle between view and edit modes
+    function toggleEditMode(isEdit: boolean) {
+        const editControls = document.getElementById("edit-controls");
+        const viewElements = document.querySelectorAll(".view-mode");
+        const editElements = document.querySelectorAll(".edit-mode");
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+        if (editControls) {
+            editControls.classList.toggle("hidden", !isEdit);
+        }
+
+        viewElements.forEach((el) => {
+            el.classList.toggle("hidden", isEdit);
+        });
+
+        editElements.forEach((el) => {
+            el.classList.toggle("hidden", !isEdit);
+        });
+
+        checkboxes.forEach((checkbox) => {
+            (checkbox as HTMLInputElement).disabled = !isEdit;
+        });
+    }
+
+    // Update display and form values
+    function updateContent(relation: any) {
+        if (!relation) return;
+
+        currentRelation = relation;
+        const fields = [
+            "shortName",
+            "name",
+            "email",
+            "telephone",
+            "website",
+            "kvkNumber",
+            "vatNumber",
+        ];
+
+        fields.forEach((field) => {
+            const displayEl = document.getElementById(`${field}-display`);
+            const inputEl = document.getElementById(
+                `${field}-input`,
+            ) as HTMLInputElement;
+
+            if (displayEl) displayEl.textContent = relation[field] || "-";
+            if (inputEl) inputEl.value = relation[field] || "";
+        });
+
+        const customerCheckbox = document.getElementById(
+            "isCustomer-checkbox",
+        ) as HTMLInputElement;
+        const supplierCheckbox = document.getElementById(
+            "isSupplier-checkbox",
+        ) as HTMLInputElement;
+
+        if (customerCheckbox)
+            customerCheckbox.checked = relation.isCustomer || false;
+        if (supplierCheckbox)
+            supplierCheckbox.checked = relation.isSupplier || false;
+    }
+
+    // Handle form submission
+    async function handleSubmit() {
+        if (!currentRelation) return;
+
+        const saveButton = document.getElementById("save-button");
+        const errorMessage = document.getElementById("error-message");
+        if (saveButton) saveButton.setAttribute("disabled", "true");
+
+        try {
+            const formData = getFormData();
+            await handleUpdate(currentRelation.id, formData);
+
+            // Reset UI state
+            toggleEditMode(false);
+            if (errorMessage) errorMessage.classList.add("hidden");
+        } catch (error) {
+            if (errorMessage) {
+                errorMessage.textContent =
+                    error instanceof Error
+                        ? error.message
+                        : "An error occurred";
+                errorMessage.classList.remove("hidden");
+            }
+        } finally {
+            if (saveButton) saveButton.removeAttribute("disabled");
+        }
+    }
+
+    // Setup event listeners
+    document
+        .getElementById("save-button")
+        ?.addEventListener("click", handleSubmit);
+
+    // Subscribe to store changes
+    selectedRelation.subscribe((relation) => {
+        updateContent(relation);
+    });
+
+    isEditMode.subscribe((isEdit) => {
+        toggleEditMode(isEdit);
+    });
+
+    modalState.subscribe((state) => {
+        const errorMessage = document.getElementById("error-message");
+        if (errorMessage) {
+            if (state.error) {
+                errorMessage.textContent = state.error;
+                errorMessage.classList.remove("hidden");
+            } else {
+                errorMessage.classList.add("hidden");
+            }
+        }
+    });
+</script>

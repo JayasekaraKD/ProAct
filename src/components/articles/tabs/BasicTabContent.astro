@@ -1,0 +1,406 @@
+---
+// src/components/articles/tabs/BasicTabContent.astro
+---
+
+<div class="space-y-6">
+    <!-- Error Message -->
+    <div
+        id="basic-error-message"
+        class="hidden bg-red-50 text-red-600 p-3 rounded-md"
+    >
+    </div>
+
+    <!-- Save Controls -->
+    <div id="basic-edit-controls" class="hidden flex justify-end gap-2">
+        <button
+            id="basic-save-button"
+            class="flex items-center gap-2 px-3 py-1 text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50"
+        >
+            <span class="material-icons">save</span>
+            Save Changes
+        </button>
+    </div>
+
+    <div class="grid grid-cols-2 gap-x-8">
+        <!-- Article Information -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">Article Information</h3>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-gray-600">Article Code</label>
+                    <div class="mt-1" id="articleCode-container">
+                        <div
+                            class="font-medium view-mode"
+                            id="articleCode-display"
+                        >
+                        </div>
+                        <input
+                            type="text"
+                            id="articleCode-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600">EAN Code</label>
+                    <div class="mt-1" id="eanCode-container">
+                        <div class="font-medium view-mode" id="eanCode-display">
+                        </div>
+                        <input
+                            type="text"
+                            id="eanCode-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600">OEM Number</label>
+                    <div class="mt-1" id="oemNumber-container">
+                        <div
+                            class="font-medium view-mode"
+                            id="oemNumber-display"
+                        >
+                        </div>
+                        <input
+                            type="text"
+                            id="oemNumber-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600">Manufacturer</label>
+                    <div class="mt-1" id="manufacturer-container">
+                        <div
+                            class="font-medium view-mode"
+                            id="manufacturer-display"
+                        >
+                        </div>
+                        <input
+                            type="text"
+                            id="manufacturer-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm text-gray-600">Description</label>
+                    <div class="mt-1" id="description-container">
+                        <div
+                            class="font-medium view-mode"
+                            id="description-display"
+                        >
+                        </div>
+                        <input
+                            type="text"
+                            id="description-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600">Short Text</label>
+                    <div class="mt-1" id="shortText-container">
+                        <div
+                            class="font-medium view-mode"
+                            id="shortText-display"
+                        >
+                        </div>
+                        <input
+                            type="text"
+                            id="shortText-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Method -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">Sales Method</h3>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-gray-600">Gross Price (€)</label>
+                    <div class="mt-1" id="grossPrice-container">
+                        <div
+                            class="font-medium view-mode"
+                            id="grossPrice-display"
+                        >
+                        </div>
+                        <input
+                            type="number"
+                            step="0.01"
+                            id="grossPrice-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600"
+                        >Price Incl. VAT (€)</label
+                    >
+                    <div class="mt-1" id="priceInclBtw-container">
+                        <div
+                            class="font-medium view-mode"
+                            id="priceInclBtw-display"
+                        >
+                        </div>
+                        <input
+                            type="number"
+                            step="0.01"
+                            id="priceInclBtw-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600"
+                        >Last Purchase Price (€)</label
+                    >
+                    <div class="mt-1" id="latestPurchasePrice-container">
+                        <div
+                            class="font-medium view-mode"
+                            id="latestPurchasePrice-display"
+                        >
+                        </div>
+                        <input
+                            type="number"
+                            step="0.01"
+                            id="latestPurchasePrice-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="grid grid-cols-2 gap-x-8">
+        <!-- Article Group -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">Article Group</h3>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-gray-600">Group Number</label>
+                    <div class="mt-1" id="groupNumber-container">
+                        <div
+                            class="font-medium view-mode"
+                            id="groupNumber-display"
+                        >
+                        </div>
+                        <input
+                            type="text"
+                            id="groupNumber-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm text-gray-600"
+                        >Group Description</label
+                    >
+                    <div class="mt-1" id="groupName-container">
+                        <div
+                            class="font-medium view-mode"
+                            id="groupName-display"
+                        >
+                        </div>
+                        <input
+                            type="text"
+                            id="groupName-input"
+                            class="hidden edit-mode w-full px-3 py-1 border rounded-md"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alternative Article -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold">Alternative Article</h3>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-gray-600"
+                        >Alternative Article</label
+                    >
+                    <div class="mt-1 flex items-center gap-2">
+                        <span class="font-medium">-</span>
+                        <button class="text-blue-600 hover:text-blue-800">
+                            <span class="material-icons text-sm">search</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    import {
+        selectedArticle,
+        isEditMode,
+        handleUpdate,
+        modalState,
+    } from "../../../store/articleStore";
+
+    let currentArticle: any = null;
+
+    const fields = [
+        "articleCode",
+        "eanCode",
+        "oemNumber",
+        "manufacturer",
+        "description",
+        "shortText",
+        "groupNumber",
+        "groupName",
+        "grossPrice",
+        "priceInclBtw",
+        "latestPurchasePrice",
+    ];
+
+    function formatCurrency(value: number | null | undefined): string {
+        if (value == null) return "-";
+        return new Intl.NumberFormat("nl-NL", {
+            style: "currency",
+            currency: "EUR",
+        }).format(value);
+    }
+
+    function getFormData() {
+        const formData: Record<string, any> = {};
+        fields.forEach((field) => {
+            const input = document.getElementById(`${field}-input`) as
+                | HTMLInputElement
+                | HTMLSelectElement;
+            if (input) {
+                if (
+                    [
+                        "grossPrice",
+                        "priceInclBtw",
+                        "latestPurchasePrice",
+                    ].includes(field)
+                ) {
+                    formData[field] = input.value
+                        ? parseFloat(input.value)
+                        : null;
+                } else {
+                    formData[field] = input.value || null;
+                }
+            }
+        });
+        return formData;
+    }
+
+    function toggleEditMode(isEdit: boolean) {
+        const editControls = document.getElementById("basic-edit-controls");
+        const viewElements = document.querySelectorAll(".view-mode");
+        const editElements = document.querySelectorAll(".edit-mode");
+
+        if (editControls) {
+            editControls.classList.toggle("hidden", !isEdit);
+        }
+
+        viewElements.forEach((el) => {
+            el.classList.toggle("hidden", isEdit);
+        });
+
+        editElements.forEach((el) => {
+            el.classList.toggle("hidden", !isEdit);
+        });
+    }
+
+    function updateContent(article: any) {
+        if (!article) return;
+
+        currentArticle = article;
+
+        fields.forEach((field) => {
+            const displayEl = document.getElementById(`${field}-display`);
+            const inputEl = document.getElementById(
+                `${field}-input`,
+            ) as HTMLInputElement;
+
+            if (displayEl && inputEl) {
+                const value = article[field];
+
+                // Format display value based on field type
+                let displayValue = value;
+                if (
+                    [
+                        "grossPrice",
+                        "priceInclBtw",
+                        "latestPurchasePrice",
+                    ].includes(field)
+                ) {
+                    displayValue = formatCurrency(value);
+                }
+
+                displayEl.textContent = displayValue || "-";
+                inputEl.value = value || "";
+            }
+        });
+    }
+
+    async function handleSubmit() {
+        if (!currentArticle) return;
+
+        const saveButton = document.getElementById("basic-save-button");
+        const errorMessage = document.getElementById("basic-error-message");
+        if (saveButton) saveButton.setAttribute("disabled", "true");
+
+        try {
+            const formData = getFormData();
+            await handleUpdate(currentArticle.id, formData);
+
+            if (errorMessage) errorMessage.classList.add("hidden");
+        } catch (error) {
+            if (errorMessage) {
+                errorMessage.textContent =
+                    error instanceof Error
+                        ? error.message
+                        : "An error occurred";
+                errorMessage.classList.remove("hidden");
+            }
+        } finally {
+            if (saveButton) saveButton.removeAttribute("disabled");
+        }
+    }
+
+    document
+        .getElementById("basic-save-button")
+        ?.addEventListener("click", handleSubmit);
+
+    selectedArticle.subscribe((article) => {
+        updateContent(article);
+    });
+
+    isEditMode.subscribe((isEdit) => {
+        toggleEditMode(isEdit);
+    });
+
+    modalState.subscribe((state) => {
+        const errorMessage = document.getElementById("basic-error-message");
+        if (errorMessage) {
+            if (state.error) {
+                errorMessage.textContent = state.error;
+                errorMessage.classList.remove("hidden");
+            } else {
+                errorMessage.classList.add("hidden");
+            }
+        }
+    });
+</script>

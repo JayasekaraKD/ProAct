@@ -1,0 +1,257 @@
+---
+// src/components/relationship/tabs/AddressTabContent.astro
+---
+
+<div class="space-y-4">
+    <!-- Error Message -->
+    <div
+        id="address-error-message"
+        class="hidden bg-red-50 text-red-600 p-3 rounded-md"
+    >
+    </div>
+
+    <!-- Save Controls -->
+    <div id="address-edit-controls" class="hidden flex justify-end gap-2">
+        <button
+            id="address-save-button"
+            class="flex items-center gap-2 px-3 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50"
+        >
+            <span class="material-icons">save</span>
+            Save Changes
+        </button>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+        <!-- Regular Address -->
+        <div class="space-y-2">
+            <h3 class="font-semibold text-lg">Address</h3>
+            {
+                ["street", "houseNumber", "postcode", "place", "land"].map(
+                    (field) => (
+                        <div>
+                            <label class="text-sm text-gray-600">
+                                {field.charAt(0).toUpperCase() +
+                                    field.slice(1).replace(/([A-Z])/g, " $1")}
+                            </label>
+                            <div class="mt-1" id={`${field}-container`}>
+                                <div
+                                    class="font-medium view-mode"
+                                    id={`${field}-display`}
+                                />
+                                <input
+                                    type="text"
+                                    id={`${field}-input`}
+                                    class="hidden edit-mode w-full px-2 py-1 border rounded-md text-sm"
+                                />
+                            </div>
+                        </div>
+                    ),
+                )
+            }
+        </div>
+
+        <!-- Visiting Address -->
+        <div class="space-y-2">
+            <h3 class="font-semibold text-lg">Visiting address</h3>
+            {
+                [
+                    "visitingStreet",
+                    "visitingHouseNumber",
+                    "visitingPostcode",
+                    "visitingPlace",
+                    "visitingLand",
+                ].map((field) => (
+                    <div>
+                        <label class="text-sm text-gray-600">
+                            {field
+                                .replace("visiting", "")
+                                .charAt(0)
+                                .toUpperCase() +
+                                field
+                                    .replace("visiting", "")
+                                    .slice(1)
+                                    .replace(/([A-Z])/g, " $1")}
+                        </label>
+                        <div class="mt-1" id={`${field}-container`}>
+                            <div
+                                class="font-medium view-mode"
+                                id={`${field}-display`}
+                            />
+                            <input
+                                type="text"
+                                id={`${field}-input`}
+                                class="hidden edit-mode w-full px-2 py-1 border rounded-md text-sm"
+                            />
+                        </div>
+                    </div>
+                ))
+            }
+        </div>
+
+        <!-- Postal Address -->
+        <div class="space-y-2">
+            <h3 class="font-semibold text-lg">Postal address</h3>
+            {
+                [
+                    "mailingStreet",
+                    "mailingHouseNumber",
+                    "mailingPostcode",
+                    "mailingPlace",
+                    "mailingLand",
+                ].map((field) => (
+                    <div>
+                        <label class="text-sm text-gray-600">
+                            {field
+                                .replace("mailing", "")
+                                .charAt(0)
+                                .toUpperCase() +
+                                field
+                                    .replace("mailing", "")
+                                    .slice(1)
+                                    .replace(/([A-Z])/g, " $1")}
+                        </label>
+                        <div class="mt-1" id={`${field}-container`}>
+                            <div
+                                class="font-medium view-mode"
+                                id={`${field}-display`}
+                            />
+                            <input
+                                type="text"
+                                id={`${field}-input`}
+                                class="hidden edit-mode w-full px-2 py-1 border rounded-md text-sm"
+                            />
+                        </div>
+                    </div>
+                ))
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    import {
+        selectedRelation,
+        isEditMode,
+        handleUpdate,
+        modalState,
+    } from "../../../store/relationshipStore";
+
+    let currentRelation: any = null;
+
+    const addressFields = [
+        // Regular address
+        "street",
+        "houseNumber",
+        "postcode",
+        "place",
+        "land",
+        // Visiting address
+        "visitingStreet",
+        "visitingHouseNumber",
+        "visitingPostcode",
+        "visitingPlace",
+        "visitingLand",
+        // Mailing address
+        "mailingStreet",
+        "mailingHouseNumber",
+        "mailingPostcode",
+        "mailingPlace",
+        "mailingLand",
+    ];
+
+    function getFormData() {
+        const formData: Record<string, string> = {};
+        addressFields.forEach((field) => {
+            const input = document.getElementById(
+                `${field}-input`,
+            ) as HTMLInputElement;
+            if (input) {
+                formData[field] = input.value;
+            }
+        });
+        return formData;
+    }
+
+    function toggleEditMode(isEdit: boolean) {
+        const editControls = document.getElementById("address-edit-controls");
+        const viewElements = document.querySelectorAll(".view-mode");
+        const editElements = document.querySelectorAll(".edit-mode");
+
+        if (editControls) {
+            editControls.classList.toggle("hidden", !isEdit);
+        }
+
+        viewElements.forEach((el) => {
+            el.classList.toggle("hidden", isEdit);
+        });
+
+        editElements.forEach((el) => {
+            el.classList.toggle("hidden", !isEdit);
+        });
+    }
+
+    function updateContent(relation: any) {
+        if (!relation) return;
+
+        currentRelation = relation;
+
+        addressFields.forEach((field) => {
+            const displayEl = document.getElementById(`${field}-display`);
+            const inputEl = document.getElementById(
+                `${field}-input`,
+            ) as HTMLInputElement;
+
+            if (displayEl) displayEl.textContent = relation[field] || "-";
+            if (inputEl) inputEl.value = relation[field] || "";
+        });
+    }
+
+    async function handleSubmit() {
+        if (!currentRelation) return;
+
+        const saveButton = document.getElementById("address-save-button");
+        const errorMessage = document.getElementById("address-error-message");
+        if (saveButton) saveButton.setAttribute("disabled", "true");
+
+        try {
+            const formData = getFormData();
+            await handleUpdate(currentRelation.id, formData);
+
+            if (errorMessage) errorMessage.classList.add("hidden");
+        } catch (error) {
+            if (errorMessage) {
+                errorMessage.textContent =
+                    error instanceof Error
+                        ? error.message
+                        : "An error occurred";
+                errorMessage.classList.remove("hidden");
+            }
+        } finally {
+            if (saveButton) saveButton.removeAttribute("disabled");
+        }
+    }
+
+    document
+        .getElementById("address-save-button")
+        ?.addEventListener("click", handleSubmit);
+
+    selectedRelation.subscribe((relation) => {
+        updateContent(relation);
+    });
+
+    isEditMode.subscribe((isEdit) => {
+        toggleEditMode(isEdit);
+    });
+
+    modalState.subscribe((state) => {
+        const errorMessage = document.getElementById("address-error-message");
+        if (errorMessage) {
+            if (state.error) {
+                errorMessage.textContent = state.error;
+                errorMessage.classList.remove("hidden");
+            } else {
+                errorMessage.classList.add("hidden");
+            }
+        }
+    });
+</script>

@@ -1,0 +1,134 @@
+---
+// src/components/dashboard/tabs/DocumentsTabContent.astro
+---
+
+<div id="documents-content" class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h3 class="font-semibold text-lg">Documents</h3>
+    </div>
+
+    <!-- Documents List -->
+    <div class="overflow-hidden" id="documents-container">
+        <div class="text-gray-500 text-center py-8" id="no-documents-message">
+            <span class="material-icons text-4xl">description</span>
+            <p class="mt-2">No documents available</p>
+        </div>
+
+        <table class="min-w-full hidden" id="documents-table">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >Name</th
+                    >
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >Type</th
+                    >
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >Date</th
+                    >
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >Size</th
+                    >
+                </tr>
+            </thead>
+            <tbody
+                class="bg-white divide-y divide-gray-200"
+                id="documents-list"
+            >
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    import { selectedRelation } from "../../../store/relationshipStore";
+
+    async function fetchDocuments(relationId: string) {
+        try {
+            const response = await fetch(
+                `/api/relations/${relationId}/documents`,
+            );
+            if (!response.ok) throw new Error("Failed to fetch documents");
+
+            const data = await response.json();
+            return data.data || [];
+        } catch (error) {
+            console.error("Error fetching documents:", error);
+            return [];
+        }
+    }
+
+    function formatFileSize(bytes: number): string {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    }
+
+    function createDocumentRow(docData: any): HTMLTableRowElement {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    <span class="material-icons text-gray-400 mr-2">description</span>
+                    <span class="text-sm text-gray-900">${docData.name}</span>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${docData.type}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${new Date(docData.createdAt).toLocaleDateString()}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${formatFileSize(docData.size || 0)}
+            </td>
+        `;
+
+        return row;
+    }
+
+    function updateDocumentsList(documents: any[]) {
+        const documentsTable = document.getElementById("documents-table");
+        const documentsList = document.getElementById("documents-list");
+        const noDocumentsMessage = document.getElementById(
+            "no-documents-message",
+        );
+
+        if (!documentsTable || !documentsList || !noDocumentsMessage) return;
+
+        if (documents.length === 0) {
+            documentsTable.classList.add("hidden");
+            noDocumentsMessage.classList.remove("hidden");
+            return;
+        }
+
+        documentsTable.classList.remove("hidden");
+        noDocumentsMessage.classList.add("hidden");
+
+        // Clear existing documents
+        documentsList.innerHTML = "";
+
+        // Add new documents
+        documents.forEach((doc) => {
+            documentsList.appendChild(createDocumentRow(doc));
+        });
+    }
+
+    // Subscribe to relation changes
+    selectedRelation.subscribe(async (relation) => {
+        if (!relation) {
+            updateDocumentsList([]);
+            return;
+        }
+
+        const documents = await fetchDocuments(relation.id);
+        updateDocumentsList(documents);
+    });
+</script>

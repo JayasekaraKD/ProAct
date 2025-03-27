@@ -1,0 +1,291 @@
+---
+// src/components/relationship/tabs/FinancialTabContent.astro
+---
+
+<div class="space-y-6">
+    <!-- Error Message -->
+    <div
+        id="financial-error-message"
+        class="hidden bg-red-50 text-red-600 p-3 rounded-md"
+    >
+    </div>
+
+    <!-- Save Controls -->
+    <div id="financial-edit-controls" class="hidden flex justify-end gap-2">
+        <button
+            id="financial-save-button"
+            class="flex items-center gap-2 px-3 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50"
+        >
+            <span class="material-icons">save</span>
+            Save Changes
+        </button>
+    </div>
+
+    <!-- Bank Account & Payment Information -->
+    <div class="grid grid-cols-3 gap-x-8">
+        <div>
+            <label class="text-sm text-gray-600">Bank account:</label>
+            <div class="mt-1" id="bankAccount-container">
+                <div class="font-medium view-mode" id="bankAccount-display">
+                </div>
+                <input
+                    type="text"
+                    id="bankAccount-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                />
+            </div>
+        </div>
+        <div>
+            <label class="text-sm text-gray-600">Payment term (days):</label>
+            <div class="mt-1" id="paymentTerm-container">
+                <div class="font-medium view-mode" id="paymentTerm-display">
+                </div>
+                <input
+                    type="number"
+                    id="paymentTerm-input"
+                    min="0"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                />
+            </div>
+        </div>
+        <div>
+            <label class="text-sm text-gray-600">Credit limit:</label>
+            <div class="mt-1" id="creditLimit-container">
+                <div class="font-medium view-mode" id="creditLimit-display">
+                </div>
+                <input
+                    type="number"
+                    id="creditLimit-input"
+                    min="0"
+                    step="0.01"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                />
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Method & Settings -->
+    <div class="grid grid-cols-3 gap-x-8">
+        <div>
+            <label class="text-sm text-gray-600">Invoice method:</label>
+            <div class="mt-1" id="invoiceMethod-container">
+                <div class="font-medium view-mode" id="invoiceMethod-display">
+                </div>
+                <select
+                    id="invoiceMethod-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                >
+                    <option value="email">Email</option>
+                    <option value="post">Post</option>
+                    <option value="portal">Customer Portal</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <label class="text-sm text-gray-600">Currency:</label>
+            <div class="mt-1" id="currency-container">
+                <div class="font-medium view-mode" id="currency-display"></div>
+                <select
+                    id="currency-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                >
+                    <option value="EUR">EUR</option>
+                    <option value="USD">USD</option>
+                    <option value="GBP">GBP</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <label class="text-sm text-gray-600">Language:</label>
+            <div class="mt-1" id="languageCorrespondence-container">
+                <div
+                    class="font-medium view-mode"
+                    id="languageCorrespondence-display"
+                >
+                </div>
+                <select
+                    id="languageCorrespondence-input"
+                    class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                >
+                    <option value="en">English</option>
+                    <option value="nl">Dutch</option>
+                    <option value="de">German</option>
+                    <option value="fr">French</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Notes -->
+    <div>
+        <label class="text-sm text-gray-600">Financial notes:</label>
+        <div class="mt-1" id="financialNotes-container">
+            <div class="font-medium view-mode" id="financialNotes-display">
+            </div>
+            <textarea
+                id="financialNotes-input"
+                class="hidden edit-mode w-full px-3 py-2 border rounded-md"
+                rows="4"
+                placeholder="Add financial notes..."></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    import {
+        selectedRelation,
+        isEditMode,
+        handleUpdate,
+        modalState,
+    } from "../../../store/relationshipStore";
+
+    let currentRelation: any = null;
+
+    const financialFields = [
+        "bankAccount",
+        "paymentTerm",
+        "creditLimit",
+        "invoiceMethod",
+        "currency",
+        "languageCorrespondence",
+        "financialNotes",
+    ];
+
+    function formatCurrency(
+        value: number | null | undefined,
+        currency: string = "EUR",
+    ): string {
+        if (value == null) return "-";
+        return new Intl.NumberFormat("nl-NL", {
+            style: "currency",
+            currency: currency,
+        }).format(value);
+    }
+
+    function getFormData() {
+        const formData: Record<string, any> = {};
+        financialFields.forEach((field) => {
+            const input = document.getElementById(`${field}-input`) as
+                | HTMLInputElement
+                | HTMLSelectElement
+                | HTMLTextAreaElement;
+            if (input) {
+                if (field === "paymentTerm" || field === "creditLimit") {
+                    formData[field] = input.value
+                        ? parseInt(input.value, 10)
+                        : null;
+                } else {
+                    formData[field] = input.value || null;
+                }
+            }
+        });
+        return formData;
+    }
+
+    function toggleEditMode(isEdit: boolean) {
+        const editControls = document.getElementById("financial-edit-controls");
+        const viewElements = document.querySelectorAll(".view-mode");
+        const editElements = document.querySelectorAll(".edit-mode");
+
+        if (editControls) {
+            editControls.classList.toggle("hidden", !isEdit);
+        }
+
+        viewElements.forEach((el) => {
+            el.classList.toggle("hidden", isEdit);
+        });
+
+        editElements.forEach((el) => {
+            el.classList.toggle("hidden", !isEdit);
+        });
+    }
+
+    function updateContent(relation: any) {
+        if (!relation) return;
+
+        currentRelation = relation;
+
+        financialFields.forEach((field) => {
+            const displayEl = document.getElementById(`${field}-display`);
+            const inputEl = document.getElementById(`${field}-input`) as
+                | HTMLInputElement
+                | HTMLSelectElement
+                | HTMLTextAreaElement;
+
+            if (displayEl && inputEl) {
+                let displayValue = relation[field];
+
+                // Format specific fields
+                if (field === "creditLimit" && relation[field] != null) {
+                    displayValue = formatCurrency(
+                        relation[field],
+                        relation.currency || "EUR",
+                    );
+                } else if (field === "paymentTerm" && relation[field] != null) {
+                    displayValue = `${relation[field]} days`;
+                } else if (field === "languageCorrespondence") {
+                    const languageMap: Record<string, string> = {
+                        en: "English",
+                        nl: "Dutch",
+                        de: "German",
+                        fr: "French",
+                    };
+                    displayValue =
+                        languageMap[relation[field]] || relation[field];
+                }
+
+                displayEl.textContent = displayValue || "-";
+                inputEl.value = relation[field] || "";
+            }
+        });
+    }
+
+    async function handleSubmit() {
+        if (!currentRelation) return;
+
+        const saveButton = document.getElementById("financial-save-button");
+        const errorMessage = document.getElementById("financial-error-message");
+        if (saveButton) saveButton.setAttribute("disabled", "true");
+
+        try {
+            const formData = getFormData();
+            await handleUpdate(currentRelation.id, formData);
+
+            if (errorMessage) errorMessage.classList.add("hidden");
+        } catch (error) {
+            if (errorMessage) {
+                errorMessage.textContent =
+                    error instanceof Error
+                        ? error.message
+                        : "An error occurred";
+                errorMessage.classList.remove("hidden");
+            }
+        } finally {
+            if (saveButton) saveButton.removeAttribute("disabled");
+        }
+    }
+
+    document
+        .getElementById("financial-save-button")
+        ?.addEventListener("click", handleSubmit);
+
+    selectedRelation.subscribe((relation) => {
+        updateContent(relation);
+    });
+
+    isEditMode.subscribe((isEdit) => {
+        toggleEditMode(isEdit);
+    });
+
+    modalState.subscribe((state) => {
+        const errorMessage = document.getElementById("financial-error-message");
+        if (errorMessage) {
+            if (state.error) {
+                errorMessage.textContent = state.error;
+                errorMessage.classList.remove("hidden");
+            } else {
+                errorMessage.classList.add("hidden");
+            }
+        }
+    });
+</script>

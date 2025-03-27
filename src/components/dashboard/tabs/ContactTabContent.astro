@@ -1,0 +1,329 @@
+---
+// src/components/dashboard/tabs/ContactTabContent.astro
+---
+
+<div id="contacts-content" class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h3 class="font-semibold text-lg">Contact Persons</h3>
+        <button
+            id="create-contact-button"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+        >
+            <span class="material-icons text-sm">person_add</span>
+            Add Contact Person
+        </button>
+    </div>
+
+    <!-- Create Contact Form Dialog -->
+    <div id="create-contact-dialog" class="hidden">
+        <div class="fixed inset-0 bg-black/50 z-40"></div>
+        <div
+            class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg w-full max-w-md p-6 z-50"
+        >
+            <h2 class="text-lg font-semibold mb-4">Add Contact Person</h2>
+
+            <!-- Error Message -->
+            <div
+                id="contact-error"
+                class="hidden mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-md"
+            >
+            </div>
+
+            <form id="create-contact-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        Name *
+                        <span class="text-red-500" data-error="name"></span>
+                    </label>
+                    <input
+                        type="text"
+                        name="name"
+                        required
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        Position
+                    </label>
+                    <input
+                        type="text"
+                        name="position"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        Email
+                        <span class="text-red-500" data-error="email"></span>
+                    </label>
+                    <input
+                        type="email"
+                        name="email"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        Phone
+                    </label>
+                    <input
+                        type="tel"
+                        name="phone"
+                        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                    />
+                </div>
+
+                <div>
+                    <label class="flex items-center text-sm text-gray-700">
+                        <input
+                            type="checkbox"
+                            name="isMainContact"
+                            class="mr-2"
+                        />
+                        Set as main contact
+                    </label>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button
+                        type="button"
+                        id="cancel-contact"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        id="submit-contact"
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50"
+                    >
+                        Create Contact
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contacts List -->
+    <div class="overflow-hidden" id="contacts-container">
+        <div class="text-gray-500 text-center py-8" id="no-contacts-message">
+            <span class="material-icons text-4xl">people</span>
+            <p class="mt-2">No contact persons available</p>
+        </div>
+
+        <table class="min-w-full hidden" id="contacts-table">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >Name</th
+                    >
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >Position</th
+                    >
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >Email</th
+                    >
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                        >Phone</th
+                    >
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200" id="contacts-list">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    import { selectedRelation } from "../../../store/relationshipStore";
+
+    // Dialog elements
+    const createButton = document.getElementById("create-contact-button");
+    const dialog = document.getElementById("create-contact-dialog");
+    const form = document.getElementById(
+        "create-contact-form",
+    ) as HTMLFormElement;
+    const cancelButton = document.getElementById("cancel-contact");
+    const submitButton = document.getElementById(
+        "submit-contact",
+    ) as HTMLButtonElement;
+    const errorDiv = document.getElementById("contact-error");
+
+    // Show/Hide dialog functions
+    function showDialog() {
+        if (dialog) dialog.classList.remove("hidden");
+    }
+
+    function hideDialog() {
+        if (dialog) {
+            dialog.classList.add("hidden");
+            form?.reset();
+            if (errorDiv) errorDiv.classList.add("hidden");
+        }
+    }
+
+    // Dialog control
+    createButton?.addEventListener("click", showDialog);
+    cancelButton?.addEventListener("click", hideDialog);
+    dialog?.addEventListener("click", (e) => {
+        if (e.target === dialog) hideDialog();
+    });
+
+    // Form submission
+    async function handleSubmit(e: Event) {
+        e.preventDefault();
+        if (!form || !submitButton) return;
+
+        const currentRelation = selectedRelation.get();
+        if (!currentRelation?.id) {
+            console.error("No relation selected");
+            return;
+        }
+
+        // Collect form data
+        const formData = new FormData(form);
+        const data = {
+            relationId: currentRelation.id,
+            name: formData.get("name") as string,
+            position: (formData.get("position") as string) || null,
+            email: (formData.get("email") as string) || null,
+            phone: (formData.get("phone") as string) || null,
+            isMainContact: formData.get("isMainContact") === "on",
+        };
+
+        try {
+            submitButton.disabled = true;
+            submitButton.innerHTML =
+                '<span class="material-icons animate-spin text-sm">refresh</span> Creating...';
+
+            if (errorDiv) errorDiv.classList.add("hidden");
+
+            const response = await fetch(
+                `/api/relations/${currentRelation.id}/contact-persons`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                },
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                    errorData.error || "Failed to create contact person",
+                );
+            }
+
+            // Refresh contacts list
+            const contacts = await fetchContacts(currentRelation.id);
+            updateContactsList(contacts);
+
+            // Close dialog
+            hideDialog();
+        } catch (error) {
+            console.error("Error creating contact:", error);
+            if (errorDiv) {
+                errorDiv.textContent =
+                    error instanceof Error
+                        ? error.message
+                        : "An unknown error occurred";
+                errorDiv.classList.remove("hidden");
+            }
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = "Create Contact";
+        }
+    }
+
+    form?.addEventListener("submit", handleSubmit);
+
+    // Fetch and display contacts
+    async function fetchContacts(relationId: string) {
+        try {
+            const response = await fetch(
+                `/api/relations/${relationId}/contact-persons`,
+            );
+            if (!response.ok) throw new Error("Failed to fetch contacts");
+
+            const data = await response.json();
+            return data.data || [];
+        } catch (error) {
+            console.error("Error fetching contacts:", error);
+            return [];
+        }
+    }
+
+    function createContactRow(contact: any): HTMLTableRowElement {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">
+                            ${contact.name}
+                            ${contact.isMainContact ? '<span class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Main</span>' : ""}
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${contact.position || "-"}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${contact.email || "-"}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${contact.phone || "-"}
+            </td>
+        `;
+        return row;
+    }
+
+    function updateContactsList(contacts: any[]) {
+        const contactsTable = document.getElementById("contacts-table");
+        const contactsList = document.getElementById("contacts-list");
+        const noContactsMessage = document.getElementById(
+            "no-contacts-message",
+        );
+
+        if (!contactsTable || !contactsList || !noContactsMessage) return;
+
+        if (contacts.length === 0) {
+            contactsTable.classList.add("hidden");
+            noContactsMessage.classList.remove("hidden");
+            return;
+        }
+
+        contactsTable.classList.remove("hidden");
+        noContactsMessage.classList.add("hidden");
+
+        // Clear existing contacts
+        contactsList.innerHTML = "";
+
+        // Add new contacts
+        contacts.forEach((contact) => {
+            contactsList.appendChild(createContactRow(contact));
+        });
+    }
+
+    // Subscribe to relation changes
+    selectedRelation.subscribe(async (relation) => {
+        if (!relation) {
+            updateContactsList([]);
+            return;
+        }
+
+        const contacts = await fetchContacts(relation.id);
+        updateContactsList(contacts);
+    });
+</script>

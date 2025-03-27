@@ -1,0 +1,139 @@
+---
+// src/components/relationship/RelationshipModal.astro
+import { Dialog } from "@radix-ui/react-dialog";
+import type { Relation } from "../../db/schema";
+import RelationshipTabs from "./RelationshipTabs.astro";
+import CreateRelationshipForm from "../dashboard/CreateRelationshipForm.astro";
+
+interface Props {
+    defaultTab?: string;
+}
+
+const { defaultTab = "organization" } = Astro.props;
+---
+
+<div id="relationship-modal" class="hidden">
+    <div class="fixed inset-0 bg-black/50 z-40" data-overlay></div>
+    <div
+        class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg w-full max-w-4xl max-h-[90vh] shadow-xl z-50"
+    >
+        <div class="flex flex-col h-full max-h-[90vh]">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h2
+                    class="text-xl font-semibold flex items-center gap-3 modal-title"
+                >
+                    Create New Relationship
+                </h2>
+                <button class="close-modal text-gray-500 hover:text-gray-700">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div id="modal-content">
+                <!-- Create Form -->
+                <div id="create-form-container">
+                    <CreateRelationshipForm />
+                </div>
+
+                <!-- View/Edit Mode -->
+                <div id="view-edit-container" class="hidden">
+                    <div class="tabs-container" data-default-tab={defaultTab}>
+                        <RelationshipTabs />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    import {
+        modalState,
+        selectedRelation,
+        isEditMode,
+    } from "../../store/relationshipStore";
+
+    class ModalController {
+        private modal: HTMLElement | null;
+        private title: HTMLElement | null;
+        private closeBtn: HTMLElement | null;
+        private overlay: HTMLElement | null;
+        private createFormContainer: HTMLElement | null;
+        private viewEditContainer: HTMLElement | null;
+
+        constructor() {
+            this.modal = document.getElementById("relationship-modal");
+            this.title = document.querySelector(".modal-title");
+            this.closeBtn = document.querySelector(".close-modal");
+            this.overlay = document.querySelector("[data-overlay]");
+            this.createFormContainer = document.getElementById(
+                "create-form-container",
+            );
+            this.viewEditContainer = document.getElementById(
+                "view-edit-container",
+            );
+            this.initialize();
+        }
+
+        private initialize() {
+            if (
+                !this.modal ||
+                !this.title ||
+                !this.closeBtn ||
+                !this.overlay ||
+                !this.createFormContainer ||
+                !this.viewEditContainer
+            ) {
+                console.error("Required modal elements not found");
+                return;
+            }
+
+            // Subscribe to store changes
+            modalState.subscribe((state) => {
+                this.modal!.style.display = state.isOpen ? "block" : "none";
+            });
+
+            selectedRelation.subscribe((relation) => {
+                if (this.title) {
+                    this.title.textContent = relation
+                        ? relation.name
+                        : "Create New Relationship";
+                }
+
+                // Toggle between create form and view/edit mode
+                if (relation) {
+                    this.createFormContainer!.classList.add("hidden");
+                    this.viewEditContainer!.classList.remove("hidden");
+                } else {
+                    this.createFormContainer!.classList.remove("hidden");
+                    this.viewEditContainer!.classList.add("hidden");
+                }
+            });
+
+            // Setup event listeners
+            this.closeBtn.addEventListener("click", this.handleClose);
+            this.overlay.addEventListener("click", this.handleClose);
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") this.handleClose();
+            });
+        }
+
+        private handleClose = () => {
+            modalState.set({
+                isOpen: false,
+                isUpdating: false,
+                isDeleting: false,
+                isSubmitting: false,
+                error: null,
+                activeTab: "organization",
+            });
+            selectedRelation.set(null);
+            isEditMode.set(false);
+        };
+    }
+
+    // Initialize modal controller
+    new ModalController();
+</script>

@@ -1,0 +1,117 @@
+---
+// src/components/relationship/RelationshipTabs.astro
+import OrganizationTabContent from "./tabs/OrganizationTabContent.astro";
+import AddressTabContent from "./tabs/AddressTabContent.astro";
+import FinancialTabContent from "./tabs/FinancialTabContent.astro";
+import ContactsTabContent from "../dashboard/tabs/ContactTabContent.astro";
+import DocumentsTabContent from "../dashboard/tabs/DocumentTabContent.astro";
+import NotesTabContent from "../dashboard/tabs/NoteTabContent.astro";
+
+const tabs = [
+    { id: "organization", label: "Organization Information" },
+    { id: "address", label: "Address Details" },
+    { id: "financial", label: "Financial Data" },
+    { id: "contacts", label: "Contact Persons" },
+    { id: "documents", label: "Documents" },
+    { id: "notes", label: "Notes" },
+];
+
+interface Props {
+    defaultTab?: string;
+}
+
+const { defaultTab = "organization" } = Astro.props;
+---
+
+<div class="flex-1 flex flex-col min-h-0">
+    <!-- Tab List -->
+    <div class="flex gap-1 px-4 border-b bg-white" role="tablist">
+        {
+            tabs.map((tab) => (
+                <button
+                    type="button"
+                    role="tab"
+                    data-tab={tab.id}
+                    class:list={[
+                        "px-4 py-2 text-sm border-b-2 transition-colors",
+                        "hover:text-gray-800",
+                        {
+                            "border-blue-600 text-blue-600":
+                                tab.id === defaultTab,
+                            "border-transparent text-gray-600":
+                                tab.id !== defaultTab,
+                        },
+                    ]}
+                >
+                    {tab.label}
+                </button>
+            ))
+        }
+    </div>
+
+    <!-- Tab Panels -->
+    <div class="flex-1 overflow-y-auto">
+        {
+            tabs.map((tab) => (
+                <div
+                    role="tabpanel"
+                    id={`panel-${tab.id}`}
+                    class:list={["p-6", { hidden: tab.id !== defaultTab }]}
+                    data-tab-content={tab.id}
+                >
+                    {tab.id === "organization" && <OrganizationTabContent />}
+                    {tab.id === "address" && <AddressTabContent />}
+                    {tab.id === "financial" && <FinancialTabContent />}
+                    {tab.id === "contacts" && <ContactsTabContent />}
+                    {tab.id === "documents" && <DocumentsTabContent />}
+                    {tab.id === "notes" && <NotesTabContent />}
+                </div>
+            ))
+        }
+    </div>
+</div>
+
+<script>
+    import { modalState } from "../../store/relationshipStore";
+
+    // Tab elements
+    const tabButtons = document.querySelectorAll('[role="tab"]');
+    const tabPanels = document.querySelectorAll('[role="tabpanel"]');
+
+    function switchTab(tabId: string) {
+        // Update tab buttons
+        tabButtons.forEach((button) => {
+            const isSelected = button.getAttribute("data-tab") === tabId;
+            button.setAttribute("aria-selected", String(isSelected));
+            button.classList.toggle("border-blue-600", isSelected);
+            button.classList.toggle("text-blue-600", isSelected);
+            button.classList.toggle("border-transparent", !isSelected);
+            button.classList.toggle("text-gray-600", !isSelected);
+        });
+
+        // Update panels
+        tabPanels.forEach((panel) => {
+            const isPanelActive =
+                panel.getAttribute("data-tab-content") === tabId;
+            panel.classList.toggle("hidden", !isPanelActive);
+        });
+
+        // Update modal state
+        modalState.setKey("activeTab", tabId);
+    }
+
+    // Setup event listeners
+    tabButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const tabId = button.getAttribute("data-tab");
+            if (tabId) switchTab(tabId);
+        });
+    });
+
+    // Subscribe to modal state changes
+    modalState.subscribe((state) => {
+        if (state.activeTab) {
+            switchTab(state.activeTab);
+        }
+    });
+</script>
