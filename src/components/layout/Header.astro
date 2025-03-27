@@ -1,0 +1,47 @@
+---
+const { title = "Dashboard" } = Astro.props;
+---
+
+<!--src/components/layout/Header.astro!-->
+<header class="fixed top-0 left-0 right-0 h-16 bg-white border-b z-50">
+    <div class="flex items-center justify-between h-full px-4">
+        <div class="flex items-center space-x-2">
+            <button
+                type="button"
+                id="sidebar-toggle"
+                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Toggle Sidebar"
+            >
+                <span class="material-icons">menu</span>
+            </button>
+            <span class="text-xl">ProAct Software</span>
+        </div>
+
+        <nav class="flex items-center space-x-6">
+            <a href="/journal" class="text-gray-600 hover:text-gray-900"
+                >Journal</a
+            >
+            <a href="/activities" class="text-gray-600 hover:text-gray-900"
+                >Activities</a
+            >
+
+            <a href="/planning" class="text-gray-600 hover:text-gray-900"
+                >Planning board</a
+            >
+            <a href="/config" class="text-gray-600 hover:text-gray-900"
+                >Configuration</a
+            >
+            <a href="/dashboard" class="text-blue-600">Dashboard</a>
+        </nav>
+    </div>
+</header>
+
+<script>
+    // Add click handler for sidebar toggle
+    const toggleButton = document.getElementById("sidebar-toggle");
+
+    toggleButton?.addEventListener("click", () => {
+        // Dispatch custom event for sidebar toggle
+        document.dispatchEvent(new CustomEvent("toggleSidebar"));
+    });
+</script>

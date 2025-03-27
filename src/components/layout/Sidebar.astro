@@ -1,0 +1,81 @@
+---
+const pathname = new URL(Astro.request.url).pathname;
+
+const menuItems = [
+    { href: "/batches", icon: "inventory", label: "Batches" },
+    { href: "/", icon: "people", label: "Relationships" },
+    { href: "/equipment", icon: "build", label: "Equipment" },
+    { href: "/articles", icon: "article", label: "Articles" },
+    { href: "/discounts", icon: "discount", label: "Discounts" },
+    { href: "/costcodes", icon: "attach_money", label: "Costcodes" },
+    { href: "/orders", icon: "shopping_cart", label: "Orders" },
+].map((item) => ({
+    ...item,
+    active: pathname === item.href || pathname.startsWith(`${item.href}/`),
+}));
+---
+
+<aside
+    id="sidebar"
+    class="fixed left-0 top-[64px] w-[250px] h-full bg-[#1a3c61] text-white transition-all duration-300"
+>
+    <nav class="py-4">
+        <ul class="space-y-1">
+            {
+                menuItems.map((item) => (
+                    <li>
+                        <a
+                            href={item.href}
+                            class:list={[
+                                "flex items-center px-4 py-3 hover:bg-blue-800",
+                                { "bg-blue-700": item.active },
+                            ]}
+                        >
+                            <span class="material-icons text-lg">
+                                {item.icon}
+                            </span>
+                            <span class="ml-3 sidebar-text">{item.label}</span>
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+    </nav>
+</aside>
+
+<script>
+    // Handle sidebar state
+    const sidebar = document.getElementById("sidebar");
+    const mainContent = document.getElementById("main-content");
+    const sidebarTexts = document.querySelectorAll(".sidebar-text");
+
+    // Get stored state
+    let isSidebarOpen = localStorage.getItem("sidebarOpen") !== "false";
+
+    // Initialize sidebar state
+    function updateSidebarState(isOpen: boolean) {
+        if (isOpen) {
+            sidebar?.classList.remove("w-[64px]");
+            sidebar?.classList.add("w-[250px]");
+            mainContent?.classList.remove("ml-[64px]");
+            mainContent?.classList.add("ml-[250px]");
+            sidebarTexts.forEach((text) => text.classList.remove("hidden"));
+        } else {
+            sidebar?.classList.add("w-[64px]");
+            sidebar?.classList.remove("w-[250px]");
+            mainContent?.classList.add("ml-[64px]");
+            mainContent?.classList.remove("ml-[250px]");
+            sidebarTexts.forEach((text) => text.classList.add("hidden"));
+        }
+        localStorage.setItem("sidebarOpen", isOpen.toString());
+    }
+
+    // Set initial state
+    updateSidebarState(isSidebarOpen);
+
+    // Listen for toggle events
+    document.addEventListener("toggleSidebar", () => {
+        isSidebarOpen = !isSidebarOpen;
+        updateSidebarState(isSidebarOpen);
+    });
+</script>

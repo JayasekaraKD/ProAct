@@ -1,0 +1,197 @@
+---
+// src/components/discounts/DiscountTable.astro
+import type { DiscountWithArticle } from "@/db/schema/discounts";
+
+interface Props {
+    data: DiscountWithArticle[];
+}
+
+const { data } = Astro.props;
+
+function getStatusClass(status: string): string {
+    switch (status.toLowerCase()) {
+        case "active":
+            return "bg-green-100 text-green-800";
+        case "scheduled":
+            return "bg-blue-100 text-blue-800";
+        case "expired":
+            return "bg-red-100 text-red-800";
+        default:
+            return "bg-gray-100 text-gray-800";
+    }
+}
+
+function formatValue(discount: DiscountWithArticle): string {
+    if (discount.discountType === "percentage") {
+        return `${Number(discount.value).toFixed(2)}%`;
+    }
+    return new Intl.NumberFormat("nl-NL", {
+        style: "currency",
+        currency: "EUR",
+    }).format(Number(discount.value));
+}
+
+function getIdentifier(discount: DiscountWithArticle): string {
+    if (discount.category === "article" && discount.article) {
+        return discount.article.articleCode;
+    }
+    return "-";
+}
+
+function getDescription(discount: DiscountWithArticle): string {
+    if (discount.category === "article" && discount.article) {
+        return "article";
+    }
+    return "article group";
+}
+---
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                        Supplier/Relation
+                    </th>
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                        Status
+                    </th>
+
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                        Category
+                    </th>
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                        Type
+                    </th><th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                        Discount Type
+                    </th>
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                        Value
+                    </th>
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                        Item Number
+                    </th>
+                    <th
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                        Item Group
+                    </th>
+                    <th class="relative px-6 py-3">
+                        <span class="sr-only">Actions</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {
+                    data.map((discount) => (
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {discount.article?.relation?.name || "-"}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span
+                                    class:list={[
+                                        "px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full",
+                                        getStatusClass(discount.status),
+                                    ]}
+                                >
+                                    {discount.status}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {getDescription(discount)}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {discount.operationType}{" "}
+                            </td>{" "}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {discount.discountType}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatValue(discount)}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {getIdentifier(discount)}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {discount.articleGroupId}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex justify-end space-x-2">
+                                    <button
+                                        class="text-blue-600 hover:text-blue-900"
+                                        data-action="view"
+                                        data-id={discount.id}
+                                    >
+                                        <span class="material-icons">
+                                            visibility
+                                        </span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    import {
+        handleView,
+        handleEdit,
+        handleDelete,
+        discounts,
+    } from "../../store/discountStore";
+
+    function attachEventListeners() {
+        document.querySelectorAll("[data-action]").forEach((button) => {
+            button.addEventListener("click", (e) => {
+                const button = e.currentTarget as HTMLButtonElement;
+                const action = button.getAttribute("data-action");
+                const id = button.getAttribute("data-id");
+
+                if (!id) return;
+
+                const discount = discounts.get().find((d) => d.id === id);
+                if (!discount) return;
+
+                switch (action) {
+                    case "view":
+                        handleView(discount);
+                        break;
+                    case "edit":
+                        handleEdit(discount);
+                        break;
+                    case "delete":
+                        handleDelete(discount);
+                        break;
+                }
+            });
+        });
+    }
+
+    // Initial event listeners attachment
+    attachEventListeners();
+
+    // Reattach event listeners when store updates
+    discounts.subscribe(() => {
+        attachEventListeners();
+    });
+</script>

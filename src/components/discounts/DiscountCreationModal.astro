@@ -1,0 +1,393 @@
+---
+// src/components/discounts/DiscountCreationModal.astro
+---
+
+<div id="discount-creation-modal" class="hidden">
+    <div class="fixed inset-0 bg-black/50 z-40"></div>
+    <div
+        class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg w-full max-w-2xl p-6 z-50"
+    >
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold">Create New Discount</h2>
+            <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+
+        <!-- Error message -->
+        <div
+            id="error-message"
+            class="hidden mb-4 p-3 bg-red-50 text-red-600 rounded-md"
+        >
+        </div>
+
+        <!-- Form -->
+        <form id="discount-form" class="space-y-4">
+            <!-- Supplier and Article Selection -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label
+                        for="supplier-select"
+                        class="block text-sm font-medium text-gray-700"
+                        >Supplier</label
+                    >
+                    <select
+                        id="supplier-select"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        required
+                    >
+                        <option value="">Select Supplier</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label
+                        for="article-select"
+                        class="block text-sm font-medium text-gray-700"
+                        >Article</label
+                    >
+                    <select
+                        id="article-select"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        required
+                        disabled
+                    >
+                        <option value="">Select Article</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Discount Details -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Discount Type</label
+                    >
+                    <select
+                        name="discountType"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md"
+                        required
+                    >
+                        <option value="percentage">Percentage</option>
+                        <option value="fixed">Fixed Amount</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Operation Type</label
+                    >
+                    <select
+                        name="operationType"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md"
+                        required
+                    >
+                        <option value="sell">Sell</option>
+                        <option value="purchase">Purchase</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Value</label
+                    >
+                    <input
+                        type="number"
+                        name="value"
+                        step="0.01"
+                        min="0"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Status</label
+                    >
+                    <select
+                        name="status"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md"
+                        required
+                    >
+                        <option value="active">Active</option>
+                        <option value="scheduled">Scheduled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Start Date</label
+                    >
+                    <input
+                        type="date"
+                        name="startDate"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >End Date (Optional)</label
+                    >
+                    <input
+                        type="date"
+                        name="endDate"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md"
+                    />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Minimum Quantity</label
+                    >
+                    <input
+                        type="number"
+                        name="minimumQuantity"
+                        min="1"
+                        value="1"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700"
+                        >Maximum Quantity (Optional)</label
+                    >
+                    <input
+                        type="number"
+                        name="maximumQuantity"
+                        min="1"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md"
+                    />
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-end gap-3 pt-4 mt-6 border-t">
+                <button
+                    type="button"
+                    id="cancel-button"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    id="submit-button"
+                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50"
+                >
+                    Create Discount
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let selectedSupplierId: string | null = null;
+    let selectedArticleId: string | null = null;
+
+    // Get elements
+    const modal = document.getElementById("discount-creation-modal");
+    const closeButton = document.getElementById("close-modal");
+    const cancelButton = document.getElementById("cancel-button");
+    const form = document.getElementById("discount-form") as HTMLFormElement;
+    const errorMessage = document.getElementById("error-message");
+    const supplierSelect = document.getElementById(
+        "supplier-select",
+    ) as HTMLSelectElement;
+    const articleSelect = document.getElementById(
+        "article-select",
+    ) as HTMLSelectElement;
+
+    function showError(message: string) {
+        if (errorMessage) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove("hidden");
+        }
+    }
+
+    function hideError() {
+        if (errorMessage) {
+            errorMessage.classList.add("hidden");
+        }
+    }
+
+    // Load suppliers
+    async function loadSuppliers() {
+        try {
+            const response = await fetch("/api/suppliers");
+            if (!response.ok) throw new Error("Failed to load suppliers");
+
+            const data = await response.json();
+            if (data.success) {
+                supplierSelect.innerHTML =
+                    '<option value="">Select Supplier</option>' +
+                    data.data
+                        .map(
+                            (supplier: any) =>
+                                `<option value="${supplier.id}">${supplier.name} (${supplier.code})</option>`,
+                        )
+                        .join("");
+            }
+        } catch (error) {
+            showError("Failed to load suppliers");
+        }
+    }
+
+    // Load articles for selected supplier
+    async function loadArticles(supplierId: string) {
+        try {
+            const response = await fetch(
+                `/api/suppliers/${supplierId}/articles`,
+            );
+            if (!response.ok) throw new Error("Failed to load articles");
+
+            const data = await response.json();
+            if (data.success) {
+                articleSelect.innerHTML =
+                    '<option value="">Select Article</option>' +
+                    data.data
+                        .map(
+                            (article: any) =>
+                                `<option value="${article.id}">${article.articleCode} - ${article.description}</option>`,
+                        )
+                        .join("");
+                articleSelect.disabled = false;
+            }
+        } catch (error) {
+            showError("Failed to load articles");
+        }
+    }
+
+    // Event listeners
+    supplierSelect.addEventListener("change", (e) => {
+        const supplierId = (e.target as HTMLSelectElement).value;
+        if (supplierId) {
+            loadArticles(supplierId);
+        } else {
+            articleSelect.innerHTML =
+                '<option value="">Select Article</option>';
+            articleSelect.disabled = true;
+        }
+    });
+
+    // In DiscountCreationModal.astro, update the form submission handler:
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideError();
+
+        const formData = new FormData(form);
+        const articleId = articleSelect.value;
+
+        if (!articleId) {
+            showError("Please select an article");
+            return;
+        }
+
+        try {
+            // Format dates as ISO strings
+            const startDate = formData.get("startDate")
+                ? new Date(formData.get("startDate") as string).toISOString()
+                : null;
+            const endDate = formData.get("endDate")
+                ? new Date(formData.get("endDate") as string).toISOString()
+                : null;
+
+            const response = await fetch("/api/discounts", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    articleId,
+                    category: "article",
+                    discountType: formData.get("discountType"),
+                    operationType: formData.get("operationType"),
+                    value: Number(formData.get("value")), // Convert to number
+                    startDate, // Send formatted date
+                    endDate, // Send formatted date
+                    minimumQuantity: Number(formData.get("minimumQuantity")), // Convert to number
+                    maximumQuantity: formData.get("maximumQuantity")
+                        ? Number(formData.get("maximumQuantity"))
+                        : null,
+                    status: formData.get("status"),
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Trigger success event
+                document.dispatchEvent(
+                    new CustomEvent("discount-created", {
+                        detail: result.data,
+                    }),
+                );
+                closeModal();
+            } else {
+                throw new Error(result.error || "Failed to create discount");
+            }
+        } catch (error) {
+            showError(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to create discount",
+            );
+        }
+    });
+
+    // Close modal functions
+    function closeModal() {
+        if (modal) {
+            modal.classList.add("hidden");
+            form.reset();
+            hideError();
+            articleSelect.innerHTML =
+                '<option value="">Select Article</option>';
+            articleSelect.disabled = true;
+        }
+    }
+
+    closeButton?.addEventListener("click", closeModal);
+    cancelButton?.addEventListener("click", closeModal);
+    modal
+        ?.querySelector(".fixed.inset-0")
+        ?.addEventListener("click", closeModal);
+
+    // Load suppliers when modal opens
+    if (modal) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (
+                    mutation.type === "attributes" &&
+                    mutation.attributeName === "class" &&
+                    !modal.classList.contains("hidden")
+                ) {
+                    loadSuppliers();
+                }
+            });
+        });
+
+        observer.observe(modal, { attributes: true });
+    }
+
+    // Global modal open function
+    (window as any).openDiscountCreationModal = function () {
+        if (modal) {
+            modal.classList.remove("hidden");
+            loadSuppliers();
+        }
+    };
+</script>
